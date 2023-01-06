@@ -14,7 +14,7 @@ void frameResizeCallback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 float bgAdjust = 0.0f, mixVal = 0.5f, scaleGlobal = 1.0f, rotateGlobal = -55.0f;
 vec3 Loc(0.0f, 0.0f, 0.0f);
-bool rotateBool = false, scaleBool = false, backgroundBool = true;
+bool rotateBool = false, scaleBool = false, backgroundBool = false;
 
 int main()
 {
@@ -39,7 +39,7 @@ int main()
 
     glViewport(0, 0, 800, 800); // setting viewport (can be smaller than our window)
     glfwSetFramebufferSizeCallback(newWindow, frameResizeCallback);
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // setting draw to wireframe mode
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // setting draw to wireframe mode
 
 
     Shader shader("shaders/vertex", "shaders/fragment");
@@ -224,6 +224,7 @@ int main()
         projectionMatrix = perspective(radians(45.0f), 1.0f, 0.1f, 100.0f);
         modelMatrix = rotate(modelMatrix, radians(rotateGlobal), vec3(0.5f, 0.5f, 0.0f)); // rotate identity matrix along the x-axis by -55.0 degrees
         translateMatrix = translate(translateMatrix, Loc);
+        translateMatrix = scale(translateMatrix, vec3(scaleGlobal, scaleGlobal, scaleGlobal));
 
         int modelLoc = glGetUniformLocation(shader.ID, "model"), 
             viewLoc = glGetUniformLocation(shader.ID, "view"),
@@ -319,13 +320,13 @@ void processInput(GLFWwindow* window) { // continually called to check if user h
         */
     }
     if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-        if (mixVal > 0.0f) {
-            mixVal -= 0.005f;
+        if (scaleGlobal > 0.0f) {
+            scaleGlobal -= 0.001f;
         }
     }
     if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-        if (mixVal < 1.0f) {
-            mixVal += 0.005f;
+        if (scaleGlobal < 1.0f) {
+            scaleGlobal += 0.001f;
         }
     }
 }
