@@ -2,7 +2,7 @@ OpenGL 3D test with GLFW/GLAD
 CONTROLS:
 W: move up
 A: move left
-S: mofe down
+S: move down
 D: move right
 Up arrow: rotate up
 Down arrow: rotate down
