@@ -1,0 +1,4 @@
+﻿  app.cpp
+C:\Users\alexe\source\repos\openGL3D\includes\shader.h(33,29): warning C4101: 'e': unreferenced local variable
+C:\Users\alexe\source\repos\openGL3D\src\app.cpp(206,25): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+  openGL3D.vcxproj -> C:\Users\alexe\source\repos\openGL3D\x64\Debug\openGL3D.exe
