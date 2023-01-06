@@ -39,7 +39,7 @@ int main()
 
     glViewport(0, 0, 800, 800); // setting viewport (can be smaller than our window)
     glfwSetFramebufferSizeCallback(newWindow, frameResizeCallback);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // setting draw to wireframe mode
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // setting draw to wireframe mode
 
 
     Shader shader("shaders/vertex", "shaders/fragment");
