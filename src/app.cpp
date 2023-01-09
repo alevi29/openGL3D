@@ -12,9 +12,10 @@ using namespace glm;
 
 void frameResizeCallback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
-float bgAdjust = 0.0f, mixVal = 0.5f, scaleGlobal = 1.0f, rotateGlobal = -35.0f;
+float bgAdjust = 0.0f, mixVal = 0.0f, scaleGlobal = 1.0f, rotateGlobal = -35.0f; 
 vec3 Loc(0.0f, 0.0f, 0.0f);
 bool rotateBool = false, scaleBool = false, backgroundBool = false;
+vec3 camPos = vec3(0.0f, 0.0f, 3.0f), camUp = vec3(0.0f, 1.0f, 0.0f), camFront = vec3(0.0f, 0.0f, -1.0f);
 
 int main()
 {
@@ -233,7 +234,7 @@ int main()
         mat4 viewMatrix = mat4(1.0f), projectionMatrix = mat4(1.0f), translateMatrix = mat4(1.0f);
 
         float radius = 10.0f, camX = sin(timeValue) * radius, camZ = cos(timeValue) * radius;
-        viewMatrix = lookAt(vec3(camX, 0.0f, camZ), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
+        viewMatrix = lookAt(camPos, camPos + camFront, camUp);
         projectionMatrix = perspective(radians(45.0f), 1.0f, 0.1f, 100.0f);
         translateMatrix = translate(translateMatrix, Loc);
         translateMatrix = scale(translateMatrix, vec3(scaleGlobal, scaleGlobal, scaleGlobal));
@@ -296,28 +297,21 @@ void frameResizeCallback(GLFWwindow* window, int width, int height) { // for res
 }
 
 void processInput(GLFWwindow* window) { // continually called to check if user has pressed ESC, in which case we exit
+    const float camSpeed = 0.5f;
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-        if (Loc.y < 1.0f) {
-            Loc.y += 0.005f;
-        }
+        camPos += camFront * camSpeed;
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-        if (Loc.y > -1.0f) {
-            Loc.y -= 0.005f;
-        }
+        camPos -= camFront * camSpeed;
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-        if (Loc.x > -1.0f) {
-            Loc.x -= 0.005f;
-        }
+        camPos -= normalize(cross(camFront, camUp)) * camSpeed;
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-        if (Loc.x < 1.0f) {
-            Loc.x += 0.005f;
-        }
+        camPos += normalize(cross(camFront, camUp)) * camSpeed;
     }
 
     if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
