@@ -12,7 +12,7 @@ using namespace glm;
 
 void frameResizeCallback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
-float bgAdjust = 0.0f, mixVal = 0.5f, scaleGlobal = 1.0f, rotateGlobal = -55.0f;
+float bgAdjust = 0.0f, mixVal = 0.5f, scaleGlobal = 1.0f, rotateGlobal = -35.0f;
 vec3 Loc(0.0f, 0.0f, 0.0f);
 bool rotateBool = false, scaleBool = false, backgroundBool = false;
 
@@ -39,7 +39,7 @@ int main()
 
     glViewport(0, 0, 800, 800); // setting viewport (can be smaller than our window)
     glfwSetFramebufferSizeCallback(newWindow, frameResizeCallback);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // setting draw to wireframe mode
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // setting draw to wireframe mode
 
 
     Shader shader("shaders/vertex", "shaders/fragment");
@@ -124,6 +124,12 @@ int main()
         1, 2, 3
     };
 
+    vec3 cubePos[] = {
+        vec3(0.0f, 0.0f, 0.0f),
+        vec3(2.4f, 0.6f, -2.0f),
+        vec3(-1.8f, 2.6f, 1.0f)
+    };
+
     // ********************************* VERTEX INFORMATION AND CREATION ********************************* //
 
     unsigned int VAO; // initializing VAO object (holds attributes)
@@ -194,6 +200,12 @@ int main()
     // ********************************* TRANSFORMATIONS ********************************* //
 
     glEnable(GL_DEPTH_TEST);
+    vec3 camPos = vec3(0.0f, 0.0f, 3.0f); // setting position of camera
+    vec3 camTarget = vec3(0.0f, 0.0f, 0.0f); // setting position of target (location to be looked at)
+    vec3 camDirection = normalize(camPos - camTarget); // creating direction vector (points in positive z-direction)
+    vec3 up = vec3(0.0f, 1.0f, 0.0f); // global direction of up
+    vec3 camRight = normalize(cross(up, camDirection)); // points in positive x-direction
+    vec3 camUp = cross(camDirection, camRight); // points in positive y-direction
 
     // ********************************* RENDER LOOP ********************************* //
 
@@ -218,11 +230,11 @@ int main()
         glUniformMatrix4fv(transformLocation, 1, GL_FALSE, value_ptr(trans));
         */
 
-        mat4 modelMatrix = mat4(1.0f), viewMatrix = mat4(1.0f), projectionMatrix = mat4(1.0f), translateMatrix = mat4(1.0f);
+        mat4 viewMatrix = mat4(1.0f), projectionMatrix = mat4(1.0f), translateMatrix = mat4(1.0f);
 
-        viewMatrix = translate(viewMatrix, vec3(0.0f, 0.0f, -3.0f)); // translating 3.0f away in the z-axis
+        float radius = 10.0f, camX = sin(timeValue) * radius, camZ = cos(timeValue) * radius;
+        viewMatrix = lookAt(vec3(camX, 0.0f, camZ), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
         projectionMatrix = perspective(radians(45.0f), 1.0f, 0.1f, 100.0f);
-        modelMatrix = rotate(modelMatrix, radians(rotateGlobal), vec3(0.5f, 0.5f, 0.0f)); // rotate identity matrix along the x-axis by -55.0 degrees
         translateMatrix = translate(translateMatrix, Loc);
         translateMatrix = scale(translateMatrix, vec3(scaleGlobal, scaleGlobal, scaleGlobal));
 
@@ -231,7 +243,6 @@ int main()
             projectionLoc = glGetUniformLocation(shader.ID, "perspective"),
             translateLoc = glGetUniformLocation(shader.ID, "transform");
 
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(modelMatrix));
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, value_ptr(viewMatrix));
         glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, value_ptr(projectionMatrix));
         glUniformMatrix4fv(translateLoc, 1, GL_FALSE, value_ptr(translateMatrix));
@@ -252,8 +263,14 @@ int main()
         shader.use();
         shader.setFloat("mixValue", mixVal);
         glBindVertexArray(VAO);
-        //glUniform4f(vertexColorLocation, 1 - alternate, alternate, 0.0f, 1.0f); // setting the value of the uniform vertexColorLocation every frame
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        for (int i = 0; i < 3; ++i) {
+            mat4 modelMatrix = mat4(1.0f);
+            modelMatrix = translate(modelMatrix, cubePos[i]);
+            float angle = 15.0 * i + 5.0;
+            modelMatrix = rotate(modelMatrix, angle, vec3(1.0f, 0.5f, 0.5f));
+            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(modelMatrix));
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
 
         /*
         trans = mat4(1.0f);
