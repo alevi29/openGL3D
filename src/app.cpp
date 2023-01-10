@@ -15,7 +15,7 @@ void processInput(GLFWwindow* window);
 float bgAdjust = 0.0f, mixVal = 0.0f, scaleGlobal = 1.0f, rotateGlobal = -35.0f; 
 vec3 Loc(0.0f, 0.0f, 0.0f);
 bool rotateBool = false, scaleBool = false, backgroundBool = false;
-vec3 camPos = vec3(0.0f, 0.0f, 3.0f), camUp = vec3(0.0f, 1.0f, 0.0f), camFront = vec3(0.0f, 0.0f, -1.0f);
+vec3 camPos = vec3(0.0f, 0.0f, 6.0f), camUp = vec3(0.0f, 1.0f, 0.0f), camFront = vec3(0.0f, 0.0f, -1.0f);
 
 int main()
 {
@@ -201,13 +201,14 @@ int main()
     // ********************************* TRANSFORMATIONS ********************************* //
 
     glEnable(GL_DEPTH_TEST);
+    /*
     vec3 camPos = vec3(0.0f, 0.0f, 3.0f); // setting position of camera
     vec3 camTarget = vec3(0.0f, 0.0f, 0.0f); // setting position of target (location to be looked at)
     vec3 camDirection = normalize(camPos - camTarget); // creating direction vector (points in positive z-direction)
     vec3 up = vec3(0.0f, 1.0f, 0.0f); // global direction of up
     vec3 camRight = normalize(cross(up, camDirection)); // points in positive x-direction
-    vec3 camUp = cross(camDirection, camRight); // points in positive y-direction
-
+    camUp = cross(camDirection, camRight); // points in positive y-direction
+    */
     // ********************************* RENDER LOOP ********************************* //
 
     while (!glfwWindowShouldClose(newWindow)) {
@@ -255,7 +256,7 @@ int main()
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         }
         else {
-            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            glClearColor(1.0f, 0.8f, 0.84f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         }
 
@@ -297,7 +298,7 @@ void frameResizeCallback(GLFWwindow* window, int width, int height) { // for res
 }
 
 void processInput(GLFWwindow* window) { // continually called to check if user has pressed ESC, in which case we exit
-    const float camSpeed = 0.5f;
+    const float camSpeed = 0.05f;
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
