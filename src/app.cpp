@@ -13,9 +13,10 @@ using namespace glm;
 void frameResizeCallback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 float bgAdjust = 0.0f, mixVal = 0.0f, scaleGlobal = 1.0f, rotateGlobal = -35.0f; 
+float timeDiff = 0.0f, lastTime = 0.0f;
 vec3 Loc(0.0f, 0.0f, 0.0f);
-bool rotateBool = false, scaleBool = false, backgroundBool = false;
 vec3 camPos = vec3(0.0f, 0.0f, 6.0f), camUp = vec3(0.0f, 1.0f, 0.0f), camFront = vec3(0.0f, 0.0f, -1.0f);
+bool rotateBool = false, scaleBool = false, backgroundBool = false;
 
 int main()
 {
@@ -128,7 +129,8 @@ int main()
     vec3 cubePos[] = {
         vec3(0.0f, 0.0f, 0.0f),
         vec3(2.4f, 0.6f, -2.0f),
-        vec3(-1.8f, 2.6f, 1.0f)
+        vec3(-1.8f, 2.6f, 1.0f),
+        vec3(0.6f, -2.6f, -10.0f)
     };
 
     // ********************************* VERTEX INFORMATION AND CREATION ********************************* //
@@ -220,7 +222,8 @@ int main()
         float timeValue = glfwGetTime(); // built in function to retrieve current time
         float greenValue = (sin(timeValue) / 2.0f) + 0.5f; // greenValue will change value according to sin function (in waves)
         float alternate = (sin(timeValue) / 4.0f) + 0.5f;
-        //int vertexColorLocation = glGetUniformLocation(shaderProgram, "theColor"); // finding the location of our uniform theColor from shaderProgram
+        timeDiff = timeValue - lastTime;
+        lastTime = timeValue;
 
         // ********************************* TRANSFORMATIONS ********************************* //
         /*
@@ -265,7 +268,7 @@ int main()
         shader.use();
         shader.setFloat("mixValue", mixVal);
         glBindVertexArray(VAO);
-        for (int i = 0; i < 3; ++i) {
+        for (int i = 0; i < 4; ++i) {
             mat4 modelMatrix = mat4(1.0f);
             modelMatrix = translate(modelMatrix, cubePos[i]);
             float angle = 15.0 * i + 5.0;
@@ -298,7 +301,7 @@ void frameResizeCallback(GLFWwindow* window, int width, int height) { // for res
 }
 
 void processInput(GLFWwindow* window) { // continually called to check if user has pressed ESC, in which case we exit
-    const float camSpeed = 0.05f;
+    const float camSpeed = 3.5f * timeDiff;
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
