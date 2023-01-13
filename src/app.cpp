@@ -12,11 +12,15 @@ using namespace glm;
 
 void frameResizeCallback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
+void processMouseInput(GLFWwindow* window, double xPos, double yPos);
+
+
 float bgAdjust = 0.0f, mixVal = 0.0f, scaleGlobal = 1.0f, rotateGlobal = -35.0f; 
 float timeDiff = 0.0f, lastTime = 0.0f;
 vec3 Loc(0.0f, 0.0f, 0.0f);
 vec3 camPos = vec3(0.0f, 0.0f, 6.0f), camUp = vec3(0.0f, 1.0f, 0.0f), camFront = vec3(0.0f, 0.0f, -1.0f);
-bool rotateBool = false, scaleBool = false, backgroundBool = false;
+bool rotateBool = false, scaleBool = false, backgroundBool = false, firstMouse = true;
+float theYaw = -90.0f, thePitch = 0.0f, mouseX = 400.0f, mouseY = 400.0f;
 
 int main()
 {
@@ -40,7 +44,9 @@ int main()
     }
 
     glViewport(0, 0, 800, 800); // setting viewport (can be smaller than our window)
-    glfwSetFramebufferSizeCallback(newWindow, frameResizeCallback);
+    glfwSetFramebufferSizeCallback(newWindow, frameResizeCallback); // setting frame resize to our created function
+    glfwSetCursorPosCallback(newWindow, processMouseInput); // setting cursor processing to our created function
+    glfwSetInputMode(newWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED); // making mouse invisible, unable to move out of frame
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // setting draw to wireframe mode
 
 
@@ -48,12 +54,22 @@ int main()
 
     // ********************************* VERTEX AND INDEX ARRAYS ********************************* //
 
-    float vertices[] = { // defining vertices to be used for drawing
-    -0.2f, -0.2f, 0.0f,
-    0.2f, -0.2f, 0.0f,
-    0.0f, 0.0f, 0.0f,
-    -0.2f, 0.2f, 0.0f,
-    0.2f, 0.2f, 0.0f
+    float crosshair[] = { // defining vertices to be used for drawing
+    -0.02f, -0.05f, 0.0f,
+    -0.02f, 0.05f, 0.0f,
+    0.02f, -0.05f, 0.0f,
+
+    -0.02f, 0.05f, 0.0f,
+    0.02f, 0.05f, 0.0f,
+    0.02f, -0.05f, 0.0f,
+
+    -0.05f, -0.02f, 0.0f,
+    -0.05f, 0.02f, 0.0f,
+    0.05f, 0.02f, 0.0f,
+
+    0.05f, 0.02f, 0.0f,
+    0.05f, -0.02f, 0.0f,
+    -0.05f, -0.02f, 0.0f,
     };
 
     float vertices2[] = {
@@ -267,7 +283,7 @@ int main()
 
         shader.use();
         shader.setFloat("mixValue", mixVal);
-        glBindVertexArray(VAO);
+        //glBindVertexArray(VAO);
         for (int i = 0; i < 4; ++i) {
             mat4 modelMatrix = mat4(1.0f);
             modelMatrix = translate(modelMatrix, cubePos[i]);
@@ -278,11 +294,14 @@ int main()
         }
 
         /*
-        trans = mat4(1.0f);
-        trans = translate(trans, vec3(-0.5, 0.5, 0));
-        trans = scale(trans, vec3(sin(timeValue), sin(timeValue), sin(timeValue)));
-        glUniformMatrix4fv(transformLocation, 1, GL_FALSE, &trans[0][0]);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(VAO); // binding VAO to current object
+        glBindBuffer(GL_ARRAY_BUFFER, VBO); // binding buffers to the array
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO); // binding element buffer object to element array
+
+        glBufferData(GL_ARRAY_BUFFER, sizeof(crosshair), crosshair, GL_STATIC_DRAW);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void*)0);
+        glEnableVertexAttribArray(0);
+        glDrawArrays(GL_TRIANGLES, 0, 12);
         */
 
         // ********************************* POST-RENDER ********************************* //
@@ -301,7 +320,7 @@ void frameResizeCallback(GLFWwindow* window, int width, int height) { // for res
 }
 
 void processInput(GLFWwindow* window) { // continually called to check if user has pressed ESC, in which case we exit
-    const float camSpeed = 3.5f * timeDiff;
+    const float camSpeed = 5.0f * timeDiff;
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
@@ -317,7 +336,12 @@ void processInput(GLFWwindow* window) { // continually called to check if user h
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
         camPos += normalize(cross(camFront, camUp)) * camSpeed;
     }
-
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+        camPos.y += 0.01f;
+    }
+    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
+        camPos.y -= 0.01f;
+    }
     if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
         rotateGlobal -= 0.4f;
         /*
@@ -344,4 +368,28 @@ void processInput(GLFWwindow* window) { // continually called to check if user h
             scaleGlobal += 0.001f;
         }
     }
+}
+
+void processMouseInput(GLFWwindow* window, double xPos, double yPos) {
+    const float sens = 0.1f;
+
+    if (firstMouse == true) {
+        mouseX = xPos;
+        mouseY = yPos;
+        firstMouse = false;
+    }
+
+    float xChange = xPos - mouseX, yChange = yPos - mouseY;
+    mouseX = xPos, mouseY = yPos;
+    xChange *= sens, yChange *= sens;
+    theYaw += xChange, thePitch -= yChange;
+
+    if (thePitch > 89.0f) thePitch = 89.0f; // restricting vertical mouse movement
+    if (thePitch < -89.0f) thePitch = -89.0f;
+
+    vec3 direction;
+    direction.x = cos(radians(theYaw)) * cos(radians(thePitch));
+    direction.y = sin(radians(thePitch));
+    direction.z = sin(radians(theYaw)) * cos(radians(thePitch));
+    camFront = normalize(direction);
 }
