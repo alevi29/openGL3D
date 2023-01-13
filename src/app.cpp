@@ -342,6 +342,16 @@ void processInput(GLFWwindow* window) { // continually called to check if user h
     if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
         camPos.y -= 0.01f;
     }
+    
+    if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS) {
+        if (glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED) {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        }
+        else {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        }
+    }
+    
     if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
         rotateGlobal -= 0.4f;
         /*
@@ -371,25 +381,27 @@ void processInput(GLFWwindow* window) { // continually called to check if user h
 }
 
 void processMouseInput(GLFWwindow* window, double xPos, double yPos) {
-    const float sens = 0.1f;
+    if (glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED) {
+        const float sens = 0.1f;
 
-    if (firstMouse == true) {
-        mouseX = xPos;
-        mouseY = yPos;
-        firstMouse = false;
+        if (firstMouse == true) {
+            mouseX = xPos;
+            mouseY = yPos;
+            firstMouse = false;
+        }
+
+        float xChange = xPos - mouseX, yChange = yPos - mouseY;
+        mouseX = xPos, mouseY = yPos;
+        xChange *= sens, yChange *= sens;
+        theYaw += xChange, thePitch -= yChange;
+
+        if (thePitch > 89.0f) thePitch = 89.0f; // restricting vertical mouse movement
+        if (thePitch < -89.0f) thePitch = -89.0f;
+
+        vec3 direction;
+        direction.x = cos(radians(theYaw)) * cos(radians(thePitch));
+        direction.y = sin(radians(thePitch));
+        direction.z = sin(radians(theYaw)) * cos(radians(thePitch));
+        camFront = normalize(direction);
     }
-
-    float xChange = xPos - mouseX, yChange = yPos - mouseY;
-    mouseX = xPos, mouseY = yPos;
-    xChange *= sens, yChange *= sens;
-    theYaw += xChange, thePitch -= yChange;
-
-    if (thePitch > 89.0f) thePitch = 89.0f; // restricting vertical mouse movement
-    if (thePitch < -89.0f) thePitch = -89.0f;
-
-    vec3 direction;
-    direction.x = cos(radians(theYaw)) * cos(radians(thePitch));
-    direction.y = sin(radians(thePitch));
-    direction.z = sin(radians(theYaw)) * cos(radians(thePitch));
-    camFront = normalize(direction);
 }
