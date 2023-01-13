@@ -1,11 +1,10 @@
 OpenGL 3D test with GLFW/GLAD
 CONTROLS:
-W: move up
+W: move forward
 A: move left
-S: move down
+S: move backwarsd
 D: move right
-Up arrow: rotate up
-Down arrow: rotate down
-Left/Right arrows: adjust mix between two textures
+Space: move up
+Left Control: move down
 
 file to run is app.cpp in src folder
